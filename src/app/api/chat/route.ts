@@ -18,7 +18,10 @@ const systemMsg = `you name is gobind singh.
         `;
 
 
-export async function GET(req: Request) {
+// export async function GET(req: Request) {
+export async function POST(req: Request) {
+    const reqBody = await req.json(); 
+    const { text } = reqBody;
     try {
         // const query = req.query.promt
         const messages: ChatCompletionMessageParam[] = [
@@ -28,7 +31,8 @@ export async function GET(req: Request) {
             },
             {
                 role: "user",
-                content: `what was iphone 17 pro launched?`
+                content: `${text}`
+                // content: `what was iphone 17 pro launched?`
             }
         ];
 
@@ -74,14 +78,14 @@ export async function GET(req: Request) {
                 return NextResponse.json({ data: completion.choices[0].message }, { status: 200 });
                 // break;
             }
-            
+
 
             for (const tool of toolCalls) {
                 console.log("tool --", tool);
                 const fcName = tool.function.name
                 const fcParams = tool.function.arguments
 
-                if (tool.function.name === "webSearch") {
+                if (fcName === "webSearch") {
                     const toolResult = await webSearch(JSON.parse(fcParams))
                     console.log("tool calling...", toolResult);
                     messages.push({

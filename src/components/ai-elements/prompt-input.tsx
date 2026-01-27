@@ -323,7 +323,7 @@ export const PromptInputActionAddAttachments = ({
 
 export interface PromptInputMessage {
   text: string;
-  files: FileUIPart[];
+  files?: FileUIPart[] | null;
 }
 
 export type PromptInputProps = Omit<

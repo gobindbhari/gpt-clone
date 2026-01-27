@@ -69,6 +69,7 @@ import { nanoid } from "nanoid";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
+import axios from "axios";
 interface MessageType {
   key: string;
   from: "user" | "assistant";
@@ -91,190 +92,190 @@ interface MessageType {
   }[];
 }
 
-const initialMessages: MessageType[] = [
-  {
-    key: nanoid(),
-    from: "user",
-    versions: [
-      {
-        id: nanoid(),
-        content: "Can you explain how to use React hooks effectively?",
-      },
-    ],
-  },
-  {
-    key: nanoid(),
-    from: "assistant",
-    sources: [
-      {
-        href: "https://react.dev/reference/react",
-        title: "React Documentation",
-      },
-      {
-        href: "https://react.dev/reference/react-dom",
-        title: "React DOM Documentation",
-      },
-    ],
-    tools: [
-      {
-        name: "mcp",
-        description: "Searching React documentation",
-        status: "input-available",
-        parameters: {
-          query: "React hooks best practices",
-          source: "react.dev",
-        },
-        result: `{
-  "query": "React hooks best practices",
-  "results": [
-    {
-      "title": "Rules of Hooks",
-      "url": "https://react.dev/warnings/invalid-hook-call-warning",
-      "snippet": "Hooks must be called at the top level of your React function components or custom hooks. Don't call hooks inside loops, conditions, or nested functions."
-    },
-    {
-      "title": "useState Hook",
-      "url": "https://react.dev/reference/react/useState",
-      "snippet": "useState is a React Hook that lets you add state to your function components. It returns an array with two values: the current state and a function to update it."
-    },
-    {
-      "title": "useEffect Hook",
-      "url": "https://react.dev/reference/react/useEffect",
-      "snippet": "useEffect lets you synchronize a component with external systems. It runs after render and can be used to perform side effects like data fetching."
-    }
-  ]
-}`,
-        error: undefined,
-      },
-    ],
-    versions: [
-      {
-        id: nanoid(),
-        content: `# React Hooks Best Practices
+// const initialMessages: MessageType[] = [
+//   {
+//     key: nanoid(),
+//     from: "user",
+//     versions: [
+//       {
+//         id: nanoid(),
+//         content: "Can you explain how to use React hooks effectively?",
+//       },
+//     ],
+//   },
+//   {
+//     key: nanoid(),
+//     from: "assistant",
+//     sources: [
+//       {
+//         href: "https://react.dev/reference/react",
+//         title: "React Documentation",
+//       },
+//       {
+//         href: "https://react.dev/reference/react-dom",
+//         title: "React DOM Documentation",
+//       },
+//     ],
+//     tools: [
+//       {
+//         name: "mcp",
+//         description: "Searching React documentation",
+//         status: "input-available",
+//         parameters: {
+//           query: "React hooks best practices",
+//           source: "react.dev",
+//         },
+//         result: `{
+//   "query": "React hooks best practices",
+//   "results": [
+//     {
+//       "title": "Rules of Hooks",
+//       "url": "https://react.dev/warnings/invalid-hook-call-warning",
+//       "snippet": "Hooks must be called at the top level of your React function components or custom hooks. Don't call hooks inside loops, conditions, or nested functions."
+//     },
+//     {
+//       "title": "useState Hook",
+//       "url": "https://react.dev/reference/react/useState",
+//       "snippet": "useState is a React Hook that lets you add state to your function components. It returns an array with two values: the current state and a function to update it."
+//     },
+//     {
+//       "title": "useEffect Hook",
+//       "url": "https://react.dev/reference/react/useEffect",
+//       "snippet": "useEffect lets you synchronize a component with external systems. It runs after render and can be used to perform side effects like data fetching."
+//     }
+//   ]
+// }`,
+//         error: undefined,
+//       },
+//     ],
+//     versions: [
+//       {
+//         id: nanoid(),
+//         content: `# React Hooks Best Practices
 
-React hooks are a powerful feature that let you use state and other React features without writing classes. Here are some tips for using them effectively:
+// React hooks are a powerful feature that let you use state and other React features without writing classes. Here are some tips for using them effectively:
 
-## Rules of Hooks
+// ## Rules of Hooks
 
-1. **Only call hooks at the top level** of your component or custom hooks
-2. **Don't call hooks inside loops, conditions, or nested functions**
+// 1. **Only call hooks at the top level** of your component or custom hooks
+// 2. **Don't call hooks inside loops, conditions, or nested functions**
 
-## Common Hooks
+// ## Common Hooks
 
-- **useState**: For local component state
-- **useEffect**: For side effects like data fetching
-- **useContext**: For consuming context
-- **useReducer**: For complex state logic
-- **useCallback**: For memoizing functions
-- **useMemo**: For memoizing values
+// - **useState**: For local component state
+// - **useEffect**: For side effects like data fetching
+// - **useContext**: For consuming context
+// - **useReducer**: For complex state logic
+// - **useCallback**: For memoizing functions
+// - **useMemo**: For memoizing values
 
-## Example of useState and useEffect
+// ## Example of useState and useEffect
 
-\`\`\`jsx
-function ProfilePage({ userId }) {
-  const [user, setUser] = useState(null);
+// \`\`\`jsx
+// function ProfilePage({ userId }) {
+//   const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    // This runs after render and when userId changes
-    fetchUser(userId).then(userData => {
-      setUser(userData);
-    });
-  }, [userId]);
+//   useEffect(() => {
+//     // This runs after render and when userId changes
+//     fetchUser(userId).then(userData => {
+//       setUser(userData);
+//     });
+//   }, [userId]);
 
-  return user ? <Profile user={user} /> : <Loading />;
-}
-\`\`\`
+//   return user ? <Profile user={user} /> : <Loading />;
+// }
+// \`\`\`
 
-Would you like me to explain any specific hook in more detail?`,
-      },
-    ],
-  },
-  {
-    key: nanoid(),
-    from: "user",
-    versions: [
-      {
-        id: nanoid(),
-        content:
-          "Yes, could you explain useCallback and useMemo in more detail? When should I use one over the other?",
-      },
-      {
-        id: nanoid(),
-        content:
-          "I'm particularly interested in understanding the performance implications of useCallback and useMemo. Could you break down when each is most appropriate?",
-      },
-      {
-        id: nanoid(),
-        content:
-          "Thanks for the overview! Could you dive deeper into the specific use cases where useCallback and useMemo make the biggest difference in React applications?",
-      },
-    ],
-  },
-  {
-    key: nanoid(),
-    from: "assistant",
-    reasoning: {
-      content: `The user is asking for a detailed explanation of useCallback and useMemo. I should provide a clear and concise explanation of each hook's purpose and how they differ.
+// Would you like me to explain any specific hook in more detail?`,
+//       },
+//     ],
+//   },
+//   {
+//     key: nanoid(),
+//     from: "user",
+//     versions: [
+//       {
+//         id: nanoid(),
+//         content:
+//           "Yes, could you explain useCallback and useMemo in more detail? When should I use one over the other?",
+//       },
+//       {
+//         id: nanoid(),
+//         content:
+//           "I'm particularly interested in understanding the performance implications of useCallback and useMemo. Could you break down when each is most appropriate?",
+//       },
+//       {
+//         id: nanoid(),
+//         content:
+//           "Thanks for the overview! Could you dive deeper into the specific use cases where useCallback and useMemo make the biggest difference in React applications?",
+//       },
+//     ],
+//   },
+//   {
+//     key: nanoid(),
+//     from: "assistant",
+//     reasoning: {
+//       content: `The user is asking for a detailed explanation of useCallback and useMemo. I should provide a clear and concise explanation of each hook's purpose and how they differ.
 
-The useCallback hook is used to memoize functions to prevent unnecessary re-renders of child components that receive functions as props.
+// The useCallback hook is used to memoize functions to prevent unnecessary re-renders of child components that receive functions as props.
 
-The useMemo hook is used to memoize values to avoid expensive recalculations on every render.
+// The useMemo hook is used to memoize values to avoid expensive recalculations on every render.
 
-Both hooks help with performance optimization, but they serve different purposes.`,
-      duration: 10,
-    },
-    versions: [
-      {
-        id: nanoid(),
-        content: `## useCallback vs useMemo
+// Both hooks help with performance optimization, but they serve different purposes.`,
+//       duration: 10,
+//     },
+//     versions: [
+//       {
+//         id: nanoid(),
+//         content: `## useCallback vs useMemo
 
-Both hooks help with performance optimization, but they serve different purposes:
+// Both hooks help with performance optimization, but they serve different purposes:
 
-### useCallback
+// ### useCallback
 
-\`useCallback\` memoizes **functions** to prevent unnecessary re-renders of child components that receive functions as props.
+// \`useCallback\` memoizes **functions** to prevent unnecessary re-renders of child components that receive functions as props.
 
-\`\`\`jsx
-// Without useCallback - a new function is created on every render
-const handleClick = () => {
-  console.log(count);
-};
+// \`\`\`jsx
+// // Without useCallback - a new function is created on every render
+// const handleClick = () => {
+//   console.log(count);
+// };
 
-// With useCallback - the function is only recreated when dependencies change
-const handleClick = useCallback(() => {
-  console.log(count);
-}, [count]);
-\`\`\`
+// // With useCallback - the function is only recreated when dependencies change
+// const handleClick = useCallback(() => {
+//   console.log(count);
+// }, [count]);
+// \`\`\`
 
-### useMemo
+// ### useMemo
 
-\`useMemo\` memoizes **values** to avoid expensive recalculations on every render.
+// \`useMemo\` memoizes **values** to avoid expensive recalculations on every render.
 
-\`\`\`jsx
-// Without useMemo - expensive calculation runs on every render
-const sortedList = expensiveSort(items);
+// \`\`\`jsx
+// // Without useMemo - expensive calculation runs on every render
+// const sortedList = expensiveSort(items);
 
-// With useMemo - calculation only runs when items change
-const sortedList = useMemo(() => expensiveSort(items), [items]);
-\`\`\`
+// // With useMemo - calculation only runs when items change
+// const sortedList = useMemo(() => expensiveSort(items), [items]);
+// \`\`\`
 
-### When to use which?
+// ### When to use which?
 
-- Use **useCallback** when:
-  - Passing callbacks to optimized child components that rely on reference equality
-  - Working with event handlers that you pass to child components
+// - Use **useCallback** when:
+//   - Passing callbacks to optimized child components that rely on reference equality
+//   - Working with event handlers that you pass to child components
 
-- Use **useMemo** when:
-  - You have computationally expensive calculations
-  - You want to avoid recreating objects that are used as dependencies for other hooks
+// - Use **useMemo** when:
+//   - You have computationally expensive calculations
+//   - You want to avoid recreating objects that are used as dependencies for other hooks
 
-### Performance Note
+// ### Performance Note
 
-Don't overuse these hooks! They come with their own overhead. Only use them when you have identified a genuine performance issue.`,
-      },
-    ],
-  },
-];
+// Don't overuse these hooks! They come with their own overhead. Only use them when you have identified a genuine performance issue.`,
+//       },
+//     ],
+//   },
+// ];
 
 const models = [
   {
@@ -356,7 +357,7 @@ const PromptInputAttachmentsDisplay = () => {
   );
 };
 
-const page = () => {
+const Page = () => {
   const [model, setModel] = useState<string>(models[0].id);
   const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
   const [text, setText] = useState<string>("");
@@ -365,91 +366,91 @@ const page = () => {
   const [status, setStatus] = useState<
     "submitted" | "streaming" | "ready" | "error"
   >("ready");
-  const [messages, setMessages] = useState<MessageType[]>(initialMessages);
+  const [messages, setMessages] = useState<MessageType[]>([]);
   const [_streamingMessageId, setStreamingMessageId] = useState<string | null>(
     null
   );
 
   const selectedModelData = models.find((m) => m.id === model);
 
-  const streamResponse = useCallback(
-    async (messageId: string, content: string) => {
-      setStatus("streaming");
-      setStreamingMessageId(messageId);
+  // const streamResponse = useCallback(
+  //   async (messageId: string, content: string) => {
+  //     setStatus("streaming");
+  //     setStreamingMessageId(messageId);
 
-      const words = content.split(" ");
-      let currentContent = "";
+  //     const words = content.split(" ");
+  //     let currentContent = "";
 
-      for (let i = 0; i < words.length; i++) {
-        currentContent += (i > 0 ? " " : "") + words[i];
+  //     for (let i = 0; i < words.length; i++) {
+  //       currentContent += (i > 0 ? " " : "") + words[i];
 
-        setMessages((prev) =>
-          prev.map((msg) => {
-            if (msg.versions.some((v) => v.id === messageId)) {
-              return {
-                ...msg,
-                versions: msg.versions.map((v) =>
-                  v.id === messageId ? { ...v, content: currentContent } : v
-                ),
-              };
-            }
-            return msg;
-          })
-        );
+  //       setMessages((prev) =>
+  //         prev.map((msg) => {
+  //           if (msg.versions.some((v) => v.id === messageId)) {
+  //             return {
+  //               ...msg,
+  //               versions: msg.versions.map((v) =>
+  //                 v.id === messageId ? { ...v, content: currentContent } : v
+  //               ),
+  //             };
+  //           }
+  //           return msg;
+  //         })
+  //       );
 
-        await new Promise((resolve) =>
-          setTimeout(resolve, Math.random() * 100 + 50)
-        );
-      }
+  //       await new Promise((resolve) =>
+  //         setTimeout(resolve, Math.random() * 100 + 50)
+  //       );
+  //     }
 
-      setStatus("ready");
-      setStreamingMessageId(null);
-    },
-    []
-  );
+  //     setStatus("ready");
+  //     setStreamingMessageId(null);
+  //   },
+  //   []
+  // );
 
-  const addUserMessage = useCallback(
-    (content: string) => {
-      const userMessage: MessageType = {
-        key: `user-${Date.now()}`,
-        from: "user",
-        versions: [
-          {
-            id: `user-${Date.now()}`,
-            content,
-          },
-        ],
-      };
+  // const addUserMessage = useCallback(
+  //   (content: string) => {
+  //     const userMessage: MessageType = {
+  //       key: `user-${Date.now()}`,
+  //       from: "user",
+  //       versions: [
+  //         {
+  //           id: `user-${Date.now()}`,
+  //           content,
+  //         },
+  //       ],
+  //     };
 
-      setMessages((prev) => [...prev, userMessage]);
+  //     setMessages((prev) => [...prev, userMessage]);
 
-      setTimeout(() => {
-        const assistantMessageId = `assistant-${Date.now()}`;
-        const randomResponse =
-          mockResponses[Math.floor(Math.random() * mockResponses.length)];
+  //     setTimeout(() => {
+  //       const assistantMessageId = `assistant-${Date.now()}`;
+  //       const randomResponse =
+  //         mockResponses[Math.floor(Math.random() * mockResponses.length)];
 
-        const assistantMessage: MessageType = {
-          key: `assistant-${Date.now()}`,
-          from: "assistant",
-          versions: [
-            {
-              id: assistantMessageId,
-              content: "",
-            },
-          ],
-        };
+  //       const assistantMessage: MessageType = {
+  //         key: `assistant-${Date.now()}`,
+  //         from: "assistant",
+  //         versions: [
+  //           {
+  //             id: assistantMessageId,
+  //             content: "",
+  //           },
+  //         ],
+  //       };
 
-        setMessages((prev) => [...prev, assistantMessage]);
-        streamResponse(assistantMessageId, randomResponse);
-      }, 500);
-    },
-    [streamResponse]
-  );
+  //       setMessages((prev) => [...prev, assistantMessage]);
+  //       streamResponse(assistantMessageId, randomResponse);
+  //     }, 500);
+  //   },
+  //   [streamResponse]
+  // );
 
-  const handleSubmit = (message: PromptInputMessage) => {
+  const handleSubmit = async (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
     const hasAttachments = Boolean(message.files?.length);
-
+    console.log("message ----------=======>>>>>>>>>", message)
     if (!(hasText || hasAttachments)) {
       return;
     }
@@ -462,20 +463,59 @@ const page = () => {
       });
     }
 
-    addUserMessage(message.text || "Sent with attachments");
+    // addUserMessage(message.text || "Sent with attachments");
     setText("");
+
+    try {
+      const userQuery = {
+        text: message.text,
+        files: message.files && message.files,
+        // model,
+      }
+      const res = await axios.post("/api/chat", userQuery)
+      const assistantMessageId = nanoid();
+
+      console.log("res ========>>>>>>>", res);
+
+      const assistantMessage: MessageType = {
+        key: assistantMessageId,
+        from: "assistant",
+        reasoning: res.data.data.content
+          ? {
+            content: res.data.data.content,
+            duration: 0,
+          }
+          : undefined,
+        versions: [
+          {
+            id: assistantMessageId,
+            content: "",
+          },
+        ],
+      };
+
+      // Add empty assistant message first
+      setMessages((prev) => [ ...prev, assistantMessage]);
+
+      // Stream or set content
+      // await streamResponse(assistantMessageId, res.data.content);
+
+    } catch (error) {
+      setStatus("error");
+      toast.error("Failed to get response");
+    }
   };
 
   const handleSuggestionClick = (suggestion: string) => {
     setStatus("submitted");
-    addUserMessage(suggestion);
+    // addUserMessage(suggestion);
   };
 
   return (
     <div className="relative max-w-[80%] h-screen mx-auto flex size-full flex-col divide-y overflow-y-auto no-scrollbar">
       <Conversation className="h-full overflow-y-auto no-scrollbar">
         <ConversationContent className=" no-scrollbar">
-          {messages.map(({ versions, ...message }) => (
+          {messages && messages.map(({ versions, ...message }) => (
             <MessageBranch defaultBranch={0} key={message.key}>
               <MessageBranchContent>
                 {versions.map((version) => (
@@ -638,4 +678,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;
