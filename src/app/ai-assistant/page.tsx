@@ -178,7 +178,7 @@ const Page = () => {
           return <p className={cn("max-w-[85%]", from === "assistant" ? "mr-auto" : "ml-auto text-right")}>{content}</p>
         })} */}
         {messages.map(({ content, from }, idx) => {
-          return <p key={idx} className={cn( from === "assistant" ? "mr-auto max-w-[85%]" : "ml-auto max-w-[55%] ")}>
+          return <p key={idx} className={cn( from === "assistant" ? "mr-auto max-w-[85%]" : "ml-auto w-fit max-w-[55%] ")}>
             {from === "assistant" ? <AIMessage content={content} /> : String(content)}
           </p>
         })}
