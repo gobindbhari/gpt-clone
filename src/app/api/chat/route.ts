@@ -39,8 +39,18 @@ export async function POST(req: Request) {
             // }
         ];
 
+        let maxRetries = 0
+
+        let lastMessage;
+
         while (true) {
             console.log("messages --------------", allMessages);
+            
+            if(maxRetries > 5){
+                return NextResponse.json({ data: lastMessage! }, { status: 200 });
+                break;
+            }
+            maxRetries++
 
             const completion = await groq.chat.completions.create({
                 // model: "llama-3.3-70b-versatile",
@@ -76,6 +86,8 @@ export async function POST(req: Request) {
             const assistantMessage = completion.choices[0].message;
             messages.push(assistantMessage);
             const toolCalls = completion.choices[0]?.message.tool_calls
+
+            lastMessage = completion.choices[0].message
 
             if (!toolCalls) {
                 return NextResponse.json({ data: completion.choices[0].message }, { status: 200 });

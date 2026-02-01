@@ -142,7 +142,7 @@ const Page = () => {
     setMessages((prev) => [...prev, { content: message.text, role: "user" }])
     // setMessages((prev) => [...prev, { content: message.text, from: "assistant" }])
 
-    const updatedMessages = [...messages, { content: message.text, role: "user" }];
+    const updatedMessages = [...messages.slice(-5), { content: message.text, role: "user" }];
     
     try {
       // const userQuery = {
