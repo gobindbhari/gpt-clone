@@ -43,13 +43,14 @@ import { toast } from "sonner";
 import axios from "axios";
 import { cn } from "@/lib/utils";
 import AIMessage from "@/components/AIMessage";
+import { ChatCompletionMessageParam } from "groq-sdk/resources/chat/completions.mjs";
 
 
-interface MessageType {
-  // key: string;
-  from: "user" | "assistant";
-  content: string;
-}
+// interface MessageType {
+//   // key: string;
+//   from: "user" | "assistant";
+//   content: string;
+// }
 
 
 const models = [
@@ -110,7 +111,7 @@ const Page = () => {
   const [status, setStatus] = useState<
     "submitted" | "streaming" | "ready" | "error"
   >("ready");
-  const [messages, setMessages] = useState<MessageType[]>([]);
+  const [messages, setMessages] = useState<ChatCompletionMessageParam[]>([]);
   // const [streamingMessageId, setStreamingMessageId] = useState<string | null>(
   //   null
   // );
@@ -138,22 +139,24 @@ const Page = () => {
     // addUserMessage(message.text || "Sent with attachments");
     setText("");
     
-    setMessages((prev) => [...prev, { content: message.text, from: "user" }])
+    setMessages((prev) => [...prev, { content: message.text, role: "user" }])
     // setMessages((prev) => [...prev, { content: message.text, from: "assistant" }])
+
+    const updatedMessages = [...messages, { content: message.text, role: "user" }];
     
     try {
-      const userQuery = {
-        text: message.text,
-        files: message.files && message.files,
-        // model,
-      }
-      const res = await axios.post("/api/chat", userQuery)
+      // const userQuery = {
+      //   text: message.text,
+      //   // files: message.files && message.files,
+      //   // model,
+      // }
+      const res = await axios.post("/api/chat", {messages: updatedMessages})
       // const assistantMessageId = nanoid();
 
       console.log("res ========>>>>>>>", res);
 
-      const assistantMessage: MessageType = {
-        from: "assistant",
+      const assistantMessage: ChatCompletionMessageParam = {
+        role: "assistant",
         content: res.data.data.content
       };
 
@@ -177,9 +180,9 @@ const Page = () => {
         {/* {messages.map(({ content, from }) => {
           return <p className={cn("max-w-[85%]", from === "assistant" ? "mr-auto" : "ml-auto text-right")}>{content}</p>
         })} */}
-        {messages.map(({ content, from }, idx) => {
-          return <p key={idx} className={cn( from === "assistant" ? "mr-auto max-w-[85%]" : "ml-auto w-fit max-w-[55%] ")}>
-            {from === "assistant" ? <AIMessage content={content} /> : String(content)}
+        {messages.map(({ content, role }, idx) => {
+          return <p key={idx} className={cn( role === "assistant" ? "mr-auto max-w-[85%]" : "ml-auto w-fit max-w-[55%] ")}>
+            {role === "assistant" ? <AIMessage content={content as string} /> : String(content)}
           </p>
         })}
       </div>

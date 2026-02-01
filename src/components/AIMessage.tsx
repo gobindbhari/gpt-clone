@@ -6,7 +6,7 @@ import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import { useState } from "react";
 
-export default function AIMessage({ content }: { content: string }) {
+export default function AIMessage({ content }: { content: string}) {
 
 
 

@@ -7,44 +7,47 @@ import { webSearch } from "@/lib/helperFc";
 
 
 const groq = new Groq({ apiKey: GROQ_API_KEY! });
-const tvly = tavily({ apiKey: TAVILY_API_KEY! });
+// const tvly = tavily({ apiKey: TAVILY_API_KEY! });
 
-const systemMsg = `you name is gobind singh.
+const systemMsg: ChatCompletionMessageParam = {
+    role: "system",
+    content: `you name is gobind singh.
         rules:
         - do not intruduce yourself on every message if user ask this then answer only.
 
         you have access to following tools:
         - webSearch({query}: {query: string}) // Search latest and realtime data on internet.
-        `;
+        `
+};
+
+const messages: ChatCompletionMessageParam[] = []
 
 
 // export async function GET(req: Request) {
 export async function POST(req: Request) {
     const reqBody = await req.json(); 
-    const { text } = reqBody;
+    const { messages } = reqBody;
     try {
         // const query = req.query.promt
-        const messages: ChatCompletionMessageParam[] = [
-            {
-                role: "system",
-                content: systemMsg,
-            },
-            {
-                role: "user",
-                content: `${text}`
-                // content: `what was iphone 17 pro launched?`
-            }
+        const allMessages: ChatCompletionMessageParam[] = [
+            systemMsg,
+            ...messages,
+            // {
+            //     role: "user",
+            //     content: `${text}`
+            //     // content: `what was iphone 17 pro launched?`
+            // }
         ];
 
         while (true) {
-            console.log("messages --------------", messages);
+            console.log("messages --------------", allMessages);
 
             const completion = await groq.chat.completions.create({
                 // model: "llama-3.3-70b-versatile",
                 model: "openai/gpt-oss-120b",
 
                 temperature: 0, // 0 - 2
-                messages: messages,
+                messages: allMessages,
                 tool_choice: "auto",
                 tools: [
                     {
