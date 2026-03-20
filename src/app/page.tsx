@@ -359,6 +359,7 @@ const PromptInputAttachmentsDisplay = () => {
 
 const Page = () => {
   const [model, setModel] = useState<string>(models[0].id);
+  const [isThinking, setIsThinking] = useState(false)
   const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
   const [text, setText] = useState<string>("");
   const [useWebSearch, setUseWebSearch] = useState<boolean>(false);
@@ -456,21 +457,22 @@ const Page = () => {
     }
     const userMessageId = nanoid();
 
-      const userMessage: MessageType = {
-        key: userMessageId,
-        from: "user",
-        versions: [
-          {
-            id: userMessageId,
-            content: message.text,
-          },
-        ],
-      };
+    const userMessage: MessageType = {
+      key: userMessageId,
+      from: "user",
+      versions: [
+        {
+          id: userMessageId,
+          content: message.text,
+        },
+      ],
+    };
 
-    setMessages((prev) => [ ...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
+    setIsThinking(true)
 
     setStatus("submitted");
-    
+
     if (message.files?.length) {
       toast.success("Files attached", {
         description: `${message.files.length} file(s) attached to message`,
@@ -479,7 +481,7 @@ const Page = () => {
 
     // addUserMessage(message.text || "Sent with attachments");
     setText("");
-    
+
     try {
       const userQuery = {
         text: message.text,
@@ -490,7 +492,7 @@ const Page = () => {
       const assistantMessageId = nanoid();
 
       console.log("res 492 ========>>>>>>>", res);
-      
+
       const assistantMessage: MessageType = {
         key: assistantMessageId,
         from: "assistant",
@@ -503,17 +505,24 @@ const Page = () => {
         versions: [
           {
             id: assistantMessageId,
-            content: res.data.data.content,
+            // content: res.data.data.content,
+            content: "",
             // content: "",
           },
         ],
       };
 
       // Add empty assistant message first
-      setMessages((prev) => [ ...prev, assistantMessage]);
+      setIsThinking(false)
+      setMessages((prev) => [...prev, assistantMessage]);
 
       // Stream or set content
       // await streamResponse(assistantMessageId, res.data.content);
+      // now stream
+      await streamResponse(
+        assistantMessageId,
+        res.data.data.content
+      );
       setStatus("ready");
 
     } catch (error) {
@@ -525,6 +534,35 @@ const Page = () => {
   const handleSuggestionClick = (suggestion: string) => {
     setStatus("submitted");
     // addUserMessage(suggestion);
+  };
+
+  const streamResponse = async (messageId: string, content: string) => {
+    setStatus("streaming");
+
+    const words = content.split(" ");
+    let current = "";
+
+    for (let i = 0; i < words.length; i++) {
+      current += (i ? " " : "") + words[i];
+
+      setMessages((prev) =>
+        prev.map((msg) => {
+          if (msg.key === messageId) {
+            return {
+              ...msg,
+              versions: msg.versions.map((v) =>
+                v.id === messageId ? { ...v, content: current } : v
+              ),
+            };
+          }
+          return msg;
+        })
+      );
+
+      await new Promise((r) => setTimeout(r, 40)); // speed control
+    }
+
+    setStatus("ready");
   };
 
   return (
@@ -578,6 +616,22 @@ const Page = () => {
               )}
             </MessageBranch>
           ))}
+
+          {/* thinking  */}
+          {isThinking && (
+            <Message from="assistant">
+              <MessageContent>
+                <div className="flex items-center gap-2 text-gray-400">
+                  <span>Thinking</span>
+                  <span className="flex gap-1">
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:0ms]" />
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:150ms]" />
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:300ms]" />
+                  </span>
+                </div>
+              </MessageContent>
+            </Message>
+          )}
         </ConversationContent>
         <ConversationScrollButton />
       </Conversation>
