@@ -6,8 +6,10 @@ const tvly = tavily({ apiKey: TAVILY_API_KEY! });
 
 export async function webSearch({ query }: { query: string }) {
   const response = await tvly.search(query);
-  console.log("response ----", response);
+  // console.log("response from web search fc ----", response);
   
-  const finalResult = response.results.map(result => result.content).join("\n\n")
+  const finalResult = response.results.map(result => result.content)
+  // .join("\n\n")
+  // console.log("return finalResult from web search fc ----", finalResult);
   return finalResult;
 }

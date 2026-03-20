@@ -454,9 +454,23 @@ const Page = () => {
     if (!(hasText || hasAttachments)) {
       return;
     }
+    const userMessageId = nanoid();
+
+      const userMessage: MessageType = {
+        key: userMessageId,
+        from: "user",
+        versions: [
+          {
+            id: userMessageId,
+            content: message.text,
+          },
+        ],
+      };
+
+    setMessages((prev) => [ ...prev, userMessage]);
 
     setStatus("submitted");
-
+    
     if (message.files?.length) {
       toast.success("Files attached", {
         description: `${message.files.length} file(s) attached to message`,
@@ -465,7 +479,7 @@ const Page = () => {
 
     // addUserMessage(message.text || "Sent with attachments");
     setText("");
-
+    
     try {
       const userQuery = {
         text: message.text,
@@ -475,21 +489,22 @@ const Page = () => {
       const res = await axios.post("/api/chat", userQuery)
       const assistantMessageId = nanoid();
 
-      console.log("res ========>>>>>>>", res);
-
+      console.log("res 492 ========>>>>>>>", res);
+      
       const assistantMessage: MessageType = {
         key: assistantMessageId,
         from: "assistant",
-        reasoning: res.data.data.content
-          ? {
-            content: res.data.data.content,
-            duration: 0,
-          }
-          : undefined,
+        // reasoning: res.data.data.content
+        //   ? {
+        //     content: res.data.data.content,
+        //     duration: 0,
+        //   }
+        //   : undefined,
         versions: [
           {
             id: assistantMessageId,
-            content: "",
+            content: res.data.data.content,
+            // content: "",
           },
         ],
       };
@@ -499,6 +514,7 @@ const Page = () => {
 
       // Stream or set content
       // await streamResponse(assistantMessageId, res.data.content);
+      setStatus("ready");
 
     } catch (error) {
       setStatus("error");

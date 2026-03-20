@@ -9,55 +9,74 @@ import { webSearch } from "@/lib/helperFc";
 const groq = new Groq({ apiKey: GROQ_API_KEY! });
 // const tvly = tavily({ apiKey: TAVILY_API_KEY! });
 
+const date = new Date()
+
 const systemMsg: ChatCompletionMessageParam = {
     role: "system",
     content: `you name is gobind singh.
         rules:
         - do not intruduce yourself on every message if user ask this then answer only.
+        - current ISO date and time ${date.toISOString()}
+        - current local date and time ${date.toLocaleString()}
 
         you have access to following tools:
         - webSearch({query}: {query: string}) // Search latest and realtime data on internet.
         `
 };
 
-const messages: ChatCompletionMessageParam[] = []
+const messages: ChatCompletionMessageParam[] = [
+    systemMsg,
+]
 
+// const allMessages: ChatCompletionMessageParam[] = [
+//     systemMsg,
+//     ...messages,
+// ];
 
 // export async function GET(req: Request) {
 export async function POST(req: Request) {
-    const reqBody = await req.json(); 
-    const { messages } = reqBody;
+    const reqBody = await req.json();
+    const { text } = reqBody;
+
+    // const messages: ChatCompletionMessageParam[] = [
+    //     {
+    //         role: "user",
+    //         content: text
+    //     }
+    // ];
+    messages.push({
+        role: "user",
+        content: text
+    })
+
+    console.log("reqBody 33 ----->>>>", reqBody);
+    console.log("messages 34----->>>>", messages);
     try {
         // const query = req.query.promt
-        const allMessages: ChatCompletionMessageParam[] = [
-            systemMsg,
-            ...messages,
-            // {
-            //     role: "user",
-            //     content: `${text}`
-            //     // content: `what was iphone 17 pro launched?`
-            // }
-        ];
 
         let maxRetries = 0
 
         let lastMessage;
 
         while (true) {
-            console.log("messages --------------", allMessages);
-            
-            if(maxRetries > 5){
+            console.log("messages 52 --------------", messages);
+
+            if (maxRetries > 5) {
                 return NextResponse.json({ data: lastMessage! }, { status: 200 });
                 break;
             }
             maxRetries++
 
+            // await groq
+
             const completion = await groq.chat.completions.create({
-                // model: "llama-3.3-70b-versatile",
-                model: "openai/gpt-oss-120b",
+                model: "llama-3.3-70b-versatile",
+                // model: "openai/gpt-oss-120b",
+
+                // stream: true,
 
                 temperature: 0, // 0 - 2
-                messages: allMessages,
+                messages: messages,
                 tool_choice: "auto",
                 tools: [
                     {
@@ -81,7 +100,8 @@ export async function POST(req: Request) {
                 ]
             })
 
-            console.log("completion.choices[0] ----->>>>", completion.choices[0]);
+            console.log("completion ----->>>>", completion);
+            console.log("completion.choices[0].message.content ----->>>>", completion.choices[0].message.content);
 
             const assistantMessage = completion.choices[0].message;
             messages.push(assistantMessage);
@@ -96,13 +116,13 @@ export async function POST(req: Request) {
 
 
             for (const tool of toolCalls) {
-                console.log("tool --", tool);
+                // console.log("tool --", tool);
                 const fcName = tool.function.name
                 const fcParams = tool.function.arguments
 
                 if (fcName === "webSearch") {
                     const toolResult = await webSearch(JSON.parse(fcParams))
-                    console.log("tool calling...", toolResult);
+                    // console.log("tool calling 120 ...", toolResult);
                     messages.push({
                         role: "tool",
                         content: JSON.stringify({ answer: toolResult }),
