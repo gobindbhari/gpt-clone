@@ -1,49 +1,24 @@
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
-import { tavily } from "@tavily/core"
-import { GROQ_API_KEY, TAVILY_API_KEY } from "@/lib/constants";
+import { GROQ_API_KEY, systemMsg } from "@/lib/constants";
 import { ChatCompletionMessageParam } from "groq-sdk/resources/chat/completions.mjs";
 import { webSearch } from "@/lib/helperFc";
 
 
 const groq = new Groq({ apiKey: GROQ_API_KEY! });
-// const tvly = tavily({ apiKey: TAVILY_API_KEY! });
 
-const date = new Date()
 
-const systemMsg: ChatCompletionMessageParam = {
-    role: "system",
-    content: `you name is gobind singh.
-        rules:
-        - do not intruduce yourself on every message if user ask this then answer only.
-        - current ISO date and time ${date.toISOString()}
-        - current local date and time ${date.toLocaleString()}
-
-        you have access to following tools:
-        - webSearch({query}: {query: string}) // Search latest and realtime data on internet.
-        `
-};
 
 const messages: ChatCompletionMessageParam[] = [
     systemMsg,
 ]
 
-// const allMessages: ChatCompletionMessageParam[] = [
-//     systemMsg,
-//     ...messages,
-// ];
 
 // export async function GET(req: Request) {
 export async function POST(req: Request) {
     const reqBody = await req.json();
     const { text } = reqBody;
 
-    // const messages: ChatCompletionMessageParam[] = [
-    //     {
-    //         role: "user",
-    //         content: text
-    //     }
-    // ];
     messages.push({
         role: "user",
         content: text
@@ -52,7 +27,6 @@ export async function POST(req: Request) {
     console.log("reqBody 33 ----->>>>", reqBody);
     console.log("messages 34----->>>>", messages);
     try {
-        // const query = req.query.promt
 
         let maxRetries = 0
 
