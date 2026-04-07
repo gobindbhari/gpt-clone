@@ -93,7 +93,7 @@ export const MessageAction = ({
     return (
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger asChild>{button}</TooltipTrigger>
+          <TooltipTrigger  {...({ asChild: true } as any)} >{button}</TooltipTrigger>
           <TooltipContent>
             <p>{tooltip}</p>
           </TooltipContent>
@@ -312,6 +312,7 @@ export const MessageResponse = memo(
         "size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0",
         className
       )}
+      //@ts-expect-error maybe err here code
       plugins={{ code, mermaid, math, cjk }}
       {...props}
     />

@@ -19,6 +19,9 @@ export async function POST(req: Request) {
     const reqBody = await req.json();
     const { text } = reqBody;
 
+    // const encoder = new TextEncoder();
+
+
     messages.push({
         role: "user",
         content: text
@@ -49,7 +52,7 @@ export async function POST(req: Request) {
 
                 // stream: true,
 
-                temperature: 0.5, // 0 - 2
+                temperature: 0, // 0 - 2
                 messages: messages,
                 tool_choice: "auto",
                 tools: [

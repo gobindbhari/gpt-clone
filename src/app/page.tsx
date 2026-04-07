@@ -66,10 +66,14 @@ import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 import type { ToolUIPart } from "ai";
 import { CheckIcon, GlobeIcon, MicIcon } from "lucide-react";
 import { nanoid } from "nanoid";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import axios from "axios";
+import SidebarDemo from "@/components/SidebarDemo";
+
+
+
 interface MessageType {
   key: string;
   from: "user" | "assistant";
@@ -91,191 +95,6 @@ interface MessageType {
     error: string | undefined;
   }[];
 }
-
-// const initialMessages: MessageType[] = [
-//   {
-//     key: nanoid(),
-//     from: "user",
-//     versions: [
-//       {
-//         id: nanoid(),
-//         content: "Can you explain how to use React hooks effectively?",
-//       },
-//     ],
-//   },
-//   {
-//     key: nanoid(),
-//     from: "assistant",
-//     sources: [
-//       {
-//         href: "https://react.dev/reference/react",
-//         title: "React Documentation",
-//       },
-//       {
-//         href: "https://react.dev/reference/react-dom",
-//         title: "React DOM Documentation",
-//       },
-//     ],
-//     tools: [
-//       {
-//         name: "mcp",
-//         description: "Searching React documentation",
-//         status: "input-available",
-//         parameters: {
-//           query: "React hooks best practices",
-//           source: "react.dev",
-//         },
-//         result: `{
-//   "query": "React hooks best practices",
-//   "results": [
-//     {
-//       "title": "Rules of Hooks",
-//       "url": "https://react.dev/warnings/invalid-hook-call-warning",
-//       "snippet": "Hooks must be called at the top level of your React function components or custom hooks. Don't call hooks inside loops, conditions, or nested functions."
-//     },
-//     {
-//       "title": "useState Hook",
-//       "url": "https://react.dev/reference/react/useState",
-//       "snippet": "useState is a React Hook that lets you add state to your function components. It returns an array with two values: the current state and a function to update it."
-//     },
-//     {
-//       "title": "useEffect Hook",
-//       "url": "https://react.dev/reference/react/useEffect",
-//       "snippet": "useEffect lets you synchronize a component with external systems. It runs after render and can be used to perform side effects like data fetching."
-//     }
-//   ]
-// }`,
-//         error: undefined,
-//       },
-//     ],
-//     versions: [
-//       {
-//         id: nanoid(),
-//         content: `# React Hooks Best Practices
-
-// React hooks are a powerful feature that let you use state and other React features without writing classes. Here are some tips for using them effectively:
-
-// ## Rules of Hooks
-
-// 1. **Only call hooks at the top level** of your component or custom hooks
-// 2. **Don't call hooks inside loops, conditions, or nested functions**
-
-// ## Common Hooks
-
-// - **useState**: For local component state
-// - **useEffect**: For side effects like data fetching
-// - **useContext**: For consuming context
-// - **useReducer**: For complex state logic
-// - **useCallback**: For memoizing functions
-// - **useMemo**: For memoizing values
-
-// ## Example of useState and useEffect
-
-// \`\`\`jsx
-// function ProfilePage({ userId }) {
-//   const [user, setUser] = useState(null);
-
-//   useEffect(() => {
-//     // This runs after render and when userId changes
-//     fetchUser(userId).then(userData => {
-//       setUser(userData);
-//     });
-//   }, [userId]);
-
-//   return user ? <Profile user={user} /> : <Loading />;
-// }
-// \`\`\`
-
-// Would you like me to explain any specific hook in more detail?`,
-//       },
-//     ],
-//   },
-//   {
-//     key: nanoid(),
-//     from: "user",
-//     versions: [
-//       {
-//         id: nanoid(),
-//         content:
-//           "Yes, could you explain useCallback and useMemo in more detail? When should I use one over the other?",
-//       },
-//       {
-//         id: nanoid(),
-//         content:
-//           "I'm particularly interested in understanding the performance implications of useCallback and useMemo. Could you break down when each is most appropriate?",
-//       },
-//       {
-//         id: nanoid(),
-//         content:
-//           "Thanks for the overview! Could you dive deeper into the specific use cases where useCallback and useMemo make the biggest difference in React applications?",
-//       },
-//     ],
-//   },
-//   {
-//     key: nanoid(),
-//     from: "assistant",
-//     reasoning: {
-//       content: `The user is asking for a detailed explanation of useCallback and useMemo. I should provide a clear and concise explanation of each hook's purpose and how they differ.
-
-// The useCallback hook is used to memoize functions to prevent unnecessary re-renders of child components that receive functions as props.
-
-// The useMemo hook is used to memoize values to avoid expensive recalculations on every render.
-
-// Both hooks help with performance optimization, but they serve different purposes.`,
-//       duration: 10,
-//     },
-//     versions: [
-//       {
-//         id: nanoid(),
-//         content: `## useCallback vs useMemo
-
-// Both hooks help with performance optimization, but they serve different purposes:
-
-// ### useCallback
-
-// \`useCallback\` memoizes **functions** to prevent unnecessary re-renders of child components that receive functions as props.
-
-// \`\`\`jsx
-// // Without useCallback - a new function is created on every render
-// const handleClick = () => {
-//   console.log(count);
-// };
-
-// // With useCallback - the function is only recreated when dependencies change
-// const handleClick = useCallback(() => {
-//   console.log(count);
-// }, [count]);
-// \`\`\`
-
-// ### useMemo
-
-// \`useMemo\` memoizes **values** to avoid expensive recalculations on every render.
-
-// \`\`\`jsx
-// // Without useMemo - expensive calculation runs on every render
-// const sortedList = expensiveSort(items);
-
-// // With useMemo - calculation only runs when items change
-// const sortedList = useMemo(() => expensiveSort(items), [items]);
-// \`\`\`
-
-// ### When to use which?
-
-// - Use **useCallback** when:
-//   - Passing callbacks to optimized child components that rely on reference equality
-//   - Working with event handlers that you pass to child components
-
-// - Use **useMemo** when:
-//   - You have computationally expensive calculations
-//   - You want to avoid recreating objects that are used as dependencies for other hooks
-
-// ### Performance Note
-
-// Don't overuse these hooks! They come with their own overhead. Only use them when you have identified a genuine performance issue.`,
-//       },
-//     ],
-//   },
-// ];
 
 const models = [
   {
@@ -315,25 +134,6 @@ const models = [
   },
 ];
 
-const suggestions = [
-  "What are the latest trends in AI?",
-  "How does machine learning work?",
-  "Explain quantum computing",
-  "Best practices for React development",
-  "Tell me about TypeScript benefits",
-  "How to optimize database queries?",
-  "What is the difference between SQL and NoSQL?",
-  "Explain cloud computing basics",
-];
-
-const mockResponses = [
-  "That's a great question! Let me help you understand this concept better. The key thing to remember is that proper implementation requires careful consideration of the underlying principles and best practices in the field.",
-  "I'd be happy to explain this topic in detail. From my understanding, there are several important factors to consider when approaching this problem. Let me break it down step by step for you.",
-  "This is an interesting topic that comes up frequently. The solution typically involves understanding the core concepts and applying them in the right context. Here's what I recommend...",
-  "Great choice of topic! This is something that many developers encounter. The approach I'd suggest is to start with the fundamentals and then build up to more complex scenarios.",
-  "That's definitely worth exploring. From what I can see, the best way to handle this is to consider both the theoretical aspects and practical implementation details.",
-];
-
 const PromptInputAttachmentsDisplay = () => {
   const attachments = usePromptInputAttachments();
 
@@ -360,10 +160,10 @@ const PromptInputAttachmentsDisplay = () => {
 const Page = () => {
   const [model, setModel] = useState<string>(models[0].id);
   const [isThinking, setIsThinking] = useState(false)
-  const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
   const [text, setText] = useState<string>("");
-  const [useWebSearch, setUseWebSearch] = useState<boolean>(false);
-  const [useMicrophone, setUseMicrophone] = useState<boolean>(false);
+  // const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
+  // const [useWebSearch, setUseWebSearch] = useState<boolean>(false);
+  // const [useMicrophone, setUseMicrophone] = useState<boolean>(false);
   const [status, setStatus] = useState<
     "submitted" | "streaming" | "ready" | "error"
   >("ready");
@@ -374,79 +174,157 @@ const Page = () => {
 
   const selectedModelData = models.find((m) => m.id === model);
 
-  // const streamResponse = useCallback(
-  //   async (messageId: string, content: string) => {
-  //     setStatus("streaming");
-  //     setStreamingMessageId(messageId);
+  const [batches, setBatches] = useState<any[]>([]);
+  const [currentBatchId, setCurrentBatchId] = useState("");
 
-  //     const words = content.split(" ");
-  //     let currentContent = "";
+  // const batchId = useRef(nanoid())
+  // const currenBatchId = ""
 
-  //     for (let i = 0; i < words.length; i++) {
-  //       currentContent += (i > 0 ? " " : "") + words[i];
+  useEffect(() => {
+    const stored = sessionStorage.getItem("chatHistory");
 
-  //       setMessages((prev) =>
-  //         prev.map((msg) => {
-  //           if (msg.versions.some((v) => v.id === messageId)) {
-  //             return {
-  //               ...msg,
-  //               versions: msg.versions.map((v) =>
-  //                 v.id === messageId ? { ...v, content: currentContent } : v
-  //               ),
-  //             };
-  //           }
-  //           return msg;
-  //         })
-  //       );
+    if (!stored) {
+      const newBatchId = nanoid();
 
-  //       await new Promise((resolve) =>
-  //         setTimeout(resolve, Math.random() * 100 + 50)
-  //       );
-  //     }
+      const initial = {
+        currentBatchId: newBatchId,
+        batches: [
+          {
+            id: newBatchId,
+            messages: [],
+          },
+        ],
+      };
 
-  //     setStatus("ready");
-  //     setStreamingMessageId(null);
-  //   },
-  //   []
-  // );
+      sessionStorage.setItem("chatHistory", JSON.stringify(initial));
+      setBatches(initial.batches);
+      setCurrentBatchId(newBatchId);
+    }
+  }, []);
 
-  // const addUserMessage = useCallback(
-  //   (content: string) => {
-  //     const userMessage: MessageType = {
-  //       key: `user-${Date.now()}`,
-  //       from: "user",
-  //       versions: [
-  //         {
-  //           id: `user-${Date.now()}`,
-  //           content,
-  //         },
-  //       ],
-  //     };
+  // load current chat
+  useEffect(() => {
+    const stored = sessionStorage.getItem("chatHistory");
+    if (!stored) return;
 
-  //     setMessages((prev) => [...prev, userMessage]);
+    const parsed = JSON.parse(stored);
 
-  //     setTimeout(() => {
-  //       const assistantMessageId = `assistant-${Date.now()}`;
-  //       const randomResponse =
-  //         mockResponses[Math.floor(Math.random() * mockResponses.length)];
+    const current = parsed.batches.find(
+      (b: any) => b.id === parsed.currentBatchId
+    );
 
-  //       const assistantMessage: MessageType = {
-  //         key: `assistant-${Date.now()}`,
-  //         from: "assistant",
-  //         versions: [
-  //           {
-  //             id: assistantMessageId,
-  //             content: "",
-  //           },
-  //         ],
-  //       };
+    if (current) setMessages(current.messages);
+  }, []);
 
-  //       setMessages((prev) => [...prev, assistantMessage]);
-  //       streamResponse(assistantMessageId, randomResponse);
-  //     }, 500);
-  //   },
-  //   [streamResponse]
-  // );
+  // save chats
+  useEffect(() => {
+    const stored = sessionStorage.getItem("chatHistory");
+    if (!stored) return;
+
+    const parsed = JSON.parse(stored);
+
+    const updatedBatches = parsed.batches.map((batch: any) =>
+      batch.id === parsed.currentBatchId
+        ? { ...batch, messages }
+        : batch
+    );
+
+    const updated = {
+      ...parsed,
+      batches: updatedBatches,
+    };
+
+    sessionStorage.setItem("chatHistory", JSON.stringify(updated));
+
+    // update UI state too
+    setBatches(updatedBatches);
+  }, [messages]);
+
+  const createNewChat = () => {
+    const stored = sessionStorage.getItem("chatHistory");
+    if (!stored) return;
+
+    const parsed = JSON.parse(stored);
+
+    const currentBatch = parsed.batches.find(
+      (b: any) => b.id === parsed.currentBatchId
+    );
+
+    //  MAIN CHECK
+    if (!currentBatch || currentBatch.messages.length === 0) {
+      return; // don't create new chat if current is empty
+    }
+
+    const newBatchId = nanoid();
+
+    const updated = {
+      currentBatchId: newBatchId,
+      batches: [
+        ...parsed.batches,
+        { id: newBatchId, messages: [] },
+      ],
+    };
+
+    sessionStorage.setItem("chatHistory", JSON.stringify(updated));
+
+    setCurrentBatchId(newBatchId);
+    setBatches(updated.batches);
+    setMessages([]);
+  };
+
+  const switchChat = (id: string) => {
+    const stored = sessionStorage.getItem("chatHistory");
+    if (!stored) return;
+
+    const parsed = JSON.parse(stored);
+
+    const batch = parsed.batches.find((b: any) => b.id === id);
+    if (!batch) return;
+
+    const updated = {
+      ...parsed,
+      currentBatchId: id,
+    };
+
+    sessionStorage.setItem("chatHistory", JSON.stringify(updated));
+
+    setCurrentBatchId(id);
+    setMessages(batch.messages);
+  };
+
+  const deleteChat = (id: string) => {
+    const stored = sessionStorage.getItem("chatHistory");
+    if (!stored) return;
+
+    const parsed = JSON.parse(stored);
+
+    if (parsed.batches.length === 1) {
+      toast.error("At least one chat required");
+      return;
+    }
+
+    const updatedBatches = parsed.batches.filter((b: any) => b.id !== id);
+
+    let newCurrentId = parsed.currentBatchId;
+
+    // if deleting current chat → switch to another
+    if (id === parsed.currentBatchId) {
+      newCurrentId = updatedBatches[0]?.id || "";
+    }
+
+    const updated = {
+      currentBatchId: newCurrentId,
+      batches: updatedBatches,
+    };
+
+    sessionStorage.setItem("chatHistory", JSON.stringify(updated));
+
+    setBatches(updatedBatches);
+    setCurrentBatchId(newCurrentId);
+
+    const newCurrent = updatedBatches.find((b: any) => b.id === newCurrentId);
+    setMessages(newCurrent?.messages || []);
+  };
 
   const handleSubmit = async (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
@@ -565,78 +443,92 @@ const Page = () => {
     setStatus("ready");
   };
 
+  // if (window !== undefined) {
+  //   console.log("messages --", messages)
+  //   // sessionStorage.setItem("chatHistory", JSON.stringify(messages))
+  // }
   return (
-    <div className="relative max-w-[80%] h-screen mx-auto flex size-full flex-col divide-y overflow-y-auto no-scrollbar">
-      <Conversation className="h-full overflow-y-auto no-scrollbar">
-        <ConversationContent className=" no-scrollbar">
-          {messages && messages.map(({ versions, ...message }) => (
-            <MessageBranch defaultBranch={0} key={message.key}>
-              <MessageBranchContent>
-                {versions.map((version) => (
-                  <Message
-                    from={message.from}
-                    key={`${message.key}-${version.id}`}
-                  >
-                    <div>
-                      {message.sources?.length && (
-                        <Sources>
-                          <SourcesTrigger count={message.sources.length} />
-                          <SourcesContent>
-                            {message.sources.map((source) => (
-                              <Source
-                                href={source.href}
-                                key={source.href}
-                                title={source.title}
-                              />
-                            ))}
-                          </SourcesContent>
-                        </Sources>
-                      )}
-                      {message.reasoning && (
-                        <Reasoning duration={message.reasoning.duration}>
-                          <ReasoningTrigger />
-                          <ReasoningContent>
-                            {message.reasoning.content}
-                          </ReasoningContent>
-                        </Reasoning>
-                      )}
-                      <MessageContent>
-                        <MessageResponse>{version.content}</MessageResponse>
-                      </MessageContent>
-                    </div>
-                  </Message>
-                ))}
-              </MessageBranchContent>
-              {versions.length > 1 && (
-                <MessageBranchSelector from={message.from}>
-                  <MessageBranchPrevious />
-                  <MessageBranchPage />
-                  <MessageBranchNext />
-                </MessageBranchSelector>
-              )}
-            </MessageBranch>
-          ))}
+    <div className="flex">
+      <div className=" w-fit" >
+        <SidebarDemo
+          newChat={createNewChat}
+          batches={batches}
+          currentBatchId={currentBatchId}
+          switchChat={switchChat}
+          deleteChat={deleteChat}
+        />
+      </div>
+      <div className="relative max-w-[80%] lg:px-16 xl:px-20 h-screen mx-auto flex size-full flex-col divide-y overflow-y-auto no-scrollbar">
+        <Conversation className=" w-full mx-auto h-full overflow-y-auto no-scrollbar dark:text-gray-50!">
+          <ConversationContent className=" no-scrollbar text-inherit ">
+            {messages && messages.map(({ versions, ...message }) => (
+              <MessageBranch defaultBranch={0} key={message.key}>
+                <MessageBranchContent>
+                  {versions.map((version) => (
+                    <Message
+                      from={message.from}
+                      key={`${message.key}-${version.id}`}
+                    >
+                      <div>
+                        {message.sources?.length && (
+                          <Sources>
+                            <SourcesTrigger count={message.sources.length} />
+                            <SourcesContent>
+                              {message.sources.map((source) => (
+                                <Source
+                                  href={source.href}
+                                  key={source.href}
+                                  title={source.title}
+                                />
+                              ))}
+                            </SourcesContent>
+                          </Sources>
+                        )}
+                        {message.reasoning && (
+                          <Reasoning duration={message.reasoning.duration}>
+                            <ReasoningTrigger />
+                            <ReasoningContent>
+                              {message.reasoning.content}
+                            </ReasoningContent>
+                          </Reasoning>
+                        )}
+                        <MessageContent className="dark:text-(--shiki-dark)!">
+                          <MessageResponse>{version.content}</MessageResponse>
+                        </MessageContent>
+                      </div>
+                    </Message>
+                  ))}
+                </MessageBranchContent>
+                {versions.length > 1 && (
+                  <MessageBranchSelector from={message.from}>
+                    <MessageBranchPrevious />
+                    <MessageBranchPage />
+                    <MessageBranchNext />
+                  </MessageBranchSelector>
+                )}
+              </MessageBranch>
+            ))}
 
-          {/* thinking  */}
-          {isThinking && (
-            <Message from="assistant">
-              <MessageContent>
-                <div className="flex items-center gap-2 text-gray-400">
-                  <span>Thinking</span>
-                  <span className="flex gap-1">
-                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:0ms]" />
-                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:150ms]" />
-                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:300ms]" />
-                  </span>
-                </div>
-              </MessageContent>
-            </Message>
-          )}
-        </ConversationContent>
-        <ConversationScrollButton />
-      </Conversation>
-      <div className="sticky bottom-0 grid shrink-0 gap-4 pt-4">
-        {/* <Suggestions className="px-4">
+            {/* thinking  */}
+            {isThinking && (
+              <Message from="assistant">
+                <MessageContent>
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <span>Thinking</span>
+                    <span className="flex gap-1">
+                      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:0ms]" />
+                      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:150ms]" />
+                      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:300ms]" />
+                    </span>
+                  </div>
+                </MessageContent>
+              </Message>
+            )}
+          </ConversationContent>
+          <ConversationScrollButton />
+        </Conversation>
+        <div className="  w-full mx-auto sticky bottom-0 grid shrink-0 gap-4 pt-4">
+          {/* <Suggestions className="px-4">
           {suggestions.map((suggestion) => (
             <Suggestion
               key={suggestion}
@@ -645,22 +537,23 @@ const Page = () => {
             />
           ))}
         </Suggestions> */}
-        <div className=" w-full px-4 pb-4">
-          <PromptInput globalDrop multiple onSubmit={handleSubmit}>
-            <PromptInputHeader>
-              <PromptInputAttachmentsDisplay />
-            </PromptInputHeader>
-            <PromptInputBody className="flex justify-between w-full max-w-[990px] pr-4">
-              <PromptInputTextarea
-                onChange={(event) => setText(event.target.value)}
-                value={text}
-              />
-              <PromptInputSubmit
-                disabled={!(text.trim() || status) || status === "streaming"}
-                status={status}
-              />
-            </PromptInputBody>
-          </PromptInput>
+          <div className=" w-full px-4 pb-4">
+            <PromptInput globalDrop multiple onSubmit={handleSubmit}>
+              <PromptInputHeader>
+                <PromptInputAttachmentsDisplay />
+              </PromptInputHeader>
+              <PromptInputBody className="flex justify-between w-full max-w-[990px] pr-4">
+                <PromptInputTextarea
+                  onChange={(event) => setText(event.target.value)}
+                  value={text}
+                />
+                <PromptInputSubmit
+                  disabled={!(text.trim() || status) || status === "streaming"}
+                  status={status}
+                />
+              </PromptInputBody>
+            </PromptInput>
+          </div>
         </div>
       </div>
     </div>

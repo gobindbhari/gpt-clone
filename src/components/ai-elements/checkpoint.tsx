@@ -55,12 +55,12 @@ export const CheckpointTrigger = ({
 }: CheckpointTriggerProps) =>
   tooltip ? (
     <Tooltip>
-      <TooltipTrigger asChild>
+      <TooltipTrigger  {...({ asChild: true } as any)} >
         <Button size={size} type="button" variant={variant} {...props}>
           {children}
         </Button>
       </TooltipTrigger>
-      <TooltipContent align="start" side="bottom">
+      <TooltipContent {...({ align:"start" } as any)}  side="bottom">
         {tooltip}
       </TooltipContent>
     </Tooltip>

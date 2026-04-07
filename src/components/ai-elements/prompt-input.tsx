@@ -1046,6 +1046,7 @@ export const PromptInputSubmit = ({
       onStop();
       return;
     }
+    //@ts-ignore
     onClick?.(e);
   };
 

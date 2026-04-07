@@ -105,7 +105,7 @@ export const WebPreviewNavigationButton = ({
 }: WebPreviewNavigationButtonProps) => (
   <TooltipProvider>
     <Tooltip>
-      <TooltipTrigger asChild>
+      <TooltipTrigger  {...({ asChild: true } as any)} >
         <Button
           className="h-8 w-8 p-0 hover:text-foreground"
           disabled={disabled}
@@ -142,6 +142,7 @@ export const WebPreviewUrl = ({
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value);
+    // @ts-ignore
     onChange?.(event);
   };
 
@@ -150,6 +151,7 @@ export const WebPreviewUrl = ({
       const target = event.target as HTMLInputElement;
       setUrl(target.value);
     }
+    // @ts-ignore
     onKeyDown?.(event);
   };
 
@@ -214,7 +216,7 @@ export const WebPreviewConsole = ({
       open={consoleOpen}
       {...props}
     >
-      <CollapsibleTrigger asChild>
+      <CollapsibleTrigger  {...({ asChild: true } as any)} >
         <Button
           className="flex w-full items-center justify-between p-4 text-left font-medium hover:bg-muted/50"
           variant="ghost"

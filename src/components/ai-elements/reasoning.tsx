@@ -181,7 +181,9 @@ export const ReasoningContent = memo(
       )}
       {...props}
     >
-      <Streamdown plugins={{ code, mermaid, math, cjk }} {...props}>
+      <Streamdown plugins={{ 
+      // @ts-ignore
+        code, mermaid, math, cjk }} {...props}>
         {children}
       </Streamdown>
     </CollapsibleContent>

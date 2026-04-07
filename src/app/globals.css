@@ -1,8 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "highlight.js/styles/github-dark.css";
+@import "highlight.js/styles/github-dark.css";
 /* @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap'); */
-
 
 @custom-variant dark (&:is(.dark *));
 
@@ -89,8 +89,9 @@
     --sidebar-ring: 152 58% 52%;
 
     --glow: 152 58% 52%;
-  }
 
+    --sidebar: hsl(0 0% 98%);
+  }
 
 .dark {
   --background: 152 58% 52%;
@@ -125,7 +126,6 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
-
 
 @layer base {
   :root {
@@ -199,7 +199,6 @@
     background-size: 64px 64px;
   }
 }
-
 
 @layer utilities {
   .text-gradient {
@@ -279,7 +278,6 @@
 .read-the-docs {
   color: #888;
 }
-
 
 @layer base {
   * {
