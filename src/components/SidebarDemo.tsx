@@ -15,6 +15,7 @@ import {
 import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
 import { ModeToggle } from "./ModeToggle";
+import { DeleteChatBtn } from "./DeleteChatBtn";
 
 interface Props {
     newChat?: () => void;
@@ -60,9 +61,9 @@ export default function SidebarDemo({ newChat, batches, currentBatchId, switchCh
             <Sidebar>
                 <SidebarContent>
                     <SidebarGroup>
-                        <SidebarGroupLabel className="flex justify-between">
+                        <SidebarGroupLabel className="flex justify-between mb-1">
                             {/* <span>AI-Assistance</span> */}
-                            <span className="text-sm">Code-gpt</span>
+                            <span className="text-sm">Code-gpt {`(Gust-mode)`}</span>
 
                             <ModeToggle/>
                         </SidebarGroupLabel>
@@ -86,7 +87,7 @@ export default function SidebarDemo({ newChat, batches, currentBatchId, switchCh
                                     const firstMessage = batch.messages[0]?.versions?.[0]?.content || "New Chat";
 
                                     return (
-                                        <SidebarMenuItem key={batch.id} className="flex ">
+                                        <SidebarMenuItem key={batch.id} className="flex items-center gap-1">
                                             <SidebarMenuButton
                                                 onClick={() => switchChat(batch.id)}
                                                 className={batch.id === currentBatchId ? "bg-gray-200 dark:bg-gray-800" : ""}
@@ -96,12 +97,13 @@ export default function SidebarDemo({ newChat, batches, currentBatchId, switchCh
                                                 </span>
                                             </SidebarMenuButton>
                                             {/* delete button */}
-                                            <Button
+                                            <DeleteChatBtn fc={() => deleteChat(batch.id)} />
+                                            {/* <Button
                                                 onClick={() => deleteChat(batch.id)}
                                                 className="text-red-900 px-2 hover:text-red-600 -mt-0.5"
                                             >
                                                 <X/>
-                                            </Button>
+                                            </Button> */}
                                         </SidebarMenuItem>
                                     );
                                 })}

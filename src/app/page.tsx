@@ -205,7 +205,10 @@ const Page = () => {
   // load current chat
   useEffect(() => {
     const stored = sessionStorage.getItem("chatHistory");
-    if (!stored) return;
+    if (!stored) {
+      createNewChat()
+      return;
+    }
 
     const parsed = JSON.parse(stored);
 
@@ -240,7 +243,7 @@ const Page = () => {
     setBatches(updatedBatches);
   }, [messages]);
 
-  const createNewChat = () => {
+  function createNewChat() {
     const stored = sessionStorage.getItem("chatHistory");
     if (!stored) return;
 
@@ -272,7 +275,7 @@ const Page = () => {
     setMessages([]);
   };
 
-  const switchChat = (id: string) => {
+  function switchChat(id: string) {
     const stored = sessionStorage.getItem("chatHistory");
     if (!stored) return;
 
@@ -292,14 +295,29 @@ const Page = () => {
     setMessages(batch.messages);
   };
 
-  const deleteChat = (id: string) => {
+  function deleteChat(id: string) {
     const stored = sessionStorage.getItem("chatHistory");
     if (!stored) return;
 
     const parsed = JSON.parse(stored);
 
-    if (parsed.batches.length === 1) {
-      toast.error("At least one chat required");
+    const isLastChat = parsed.batches.length === 1;
+
+    // 👉 If it's the last chat → RESET everything cleanly
+    if (isLastChat) {
+      const newBatchId = nanoid();
+
+      const newData = {
+        currentBatchId: newBatchId,
+        batches: [{ id: newBatchId, messages: [] }],
+      };
+
+      sessionStorage.setItem("chatHistory", JSON.stringify(newData));
+
+      setBatches(newData.batches);
+      setCurrentBatchId(newBatchId);
+      setMessages([]);
+
       return;
     }
 
