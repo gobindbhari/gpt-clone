@@ -62,7 +62,7 @@ export default function SidebarDemo({ newChat, batches, currentBatchId, switchCh
                 <SidebarContent>
                     <SidebarGroup>
                         <SidebarGroupLabel className="flex justify-between mb-1">
-                            {/* <span>AI-Assistance</span> */}
+                            {/* <span>AI-Assistance</span>  */}
                             <span className="text-sm">Thread-AI {` (Gust-mode)`}</span>
 
                             <ModeToggle/>
