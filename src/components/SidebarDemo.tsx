@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
+import { ModeToggle } from "./ModeToggle";
 
 interface Props {
     newChat?: () => void;
@@ -33,7 +34,7 @@ export default function SidebarDemo({ newChat, batches, currentBatchId, switchCh
             fc: newChat
         },
         {
-            title: "Search",
+            title: "Search chat",
             url: "#",
             icon: Search,
         },
@@ -59,7 +60,12 @@ export default function SidebarDemo({ newChat, batches, currentBatchId, switchCh
             <Sidebar>
                 <SidebarContent>
                     <SidebarGroup>
-                        <SidebarGroupLabel>AI-Assistance</SidebarGroupLabel>
+                        <SidebarGroupLabel className="flex justify-between">
+                            {/* <span>AI-Assistance</span> */}
+                            <span className="text-sm">Code-gpt</span>
+
+                            <ModeToggle/>
+                        </SidebarGroupLabel>
                         <SidebarGroupContent>
                             <SidebarMenu>
                                 {items.map(({ title, icon: Icon, url, fc }) => (
